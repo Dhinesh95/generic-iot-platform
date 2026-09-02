@@ -11,7 +11,7 @@
 #   make clean         — remove build artifacts
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -std=c11 -DPROFILE_HOME -DMBEDTLS_CONFIG_FILE='"mbedtls/config.h"'
+CFLAGS = -Wall -Wextra -Werror -std=c11 -DPROFILE_HOME -DMBEDTLS_CONFIG_FILE='"mbedtls/config.h"' -include limits.h
 INCLUDES = -Ifirmware/shared -Ifirmware/hub -Ifirmware/profiles/home -Ifirmware/profiles/agriculture -Ifirmware/profiles/hvac -Ifirmware/profiles/water_treatment -Itests -Ilib/mbedtls/include -Ilib/mbedtls/library
 BUILD_DIR = build
 TEST_DIR = tests
