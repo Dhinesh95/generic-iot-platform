@@ -1,0 +1,15 @@
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: 'IoT Platform'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      # Production: use absolute path (e.g. /var/lib/grafana/dashboards)
+      # Sandbox: resolved at runtime via GF_PATHS_DATA or provisioning copy
+      path: ./dashboards
+      foldersFromFilesStructure: false

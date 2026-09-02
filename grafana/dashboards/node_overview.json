@@ -1,0 +1,189 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Active Node Count",
+      "type": "stat",
+      "datasource": { "type": "influxdb", "uid": "" },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "" },
+          "query": "from(bucket: \"default\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"node_telemetry\")\n  |> distinct(column: \"node_id\")\n  |> count()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "green", "value": 50 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+    {
+      "title": "Node Status Distribution",
+      "type": "piechart",
+      "datasource": { "type": "influxdb", "uid": "" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "" },
+          "query": "from(bucket: \"default\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"node_status\")\n  |> group(columns: [\"status\"])\n  |> distinct(column: \"node_id\")\n  |> count()"
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      }
+    },
+    {
+      "title": "Per-Node Metric History",
+      "type": "timeseries",
+      "datasource": { "type": "influxdb", "uid": "" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "" },
+          "query": "from(bucket: \"default\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"node_telemetry\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> group(columns: [\"node_id\", \"metric_id\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "table", "placement": "bottom" }
+      }
+    },
+    {
+      "title": "RSSI Signal Strength (Last Value per Node)",
+      "type": "table",
+      "datasource": { "type": "influxdb", "uid": "" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "" },
+          "query": "from(bucket: \"default\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"node_telemetry\")\n  |> filter(fn: (r) => r.metric_id == \"rssi\")\n  |> last()\n  |> group()\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"node_id\"], valueColumn: \"_value\")"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto" },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": -80 },
+              { "color": "green", "value": -60 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
+        },
+        "overrides": []
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": { "_value": "RSSI (dBm)" }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Fault Events (24h)",
+      "type": "barchart",
+      "datasource": { "type": "influxdb", "uid": "" },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "" },
+          "query": "from(bucket: \"default\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"fault_event\")\n  |> group(columns: [\"node_id\"])\n  |> count()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisLabel": "Fault Count",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "stacking": { "mode": "none" }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "barWidth": 0.6,
+        "groupWidth": 0.7,
+        "orientation": "horizontal",
+        "showValue": "always"
+      }
+    },
+    {
+      "title": "Domain Profile Distribution",
+      "type": "bargauge",
+      "datasource": { "type": "influxdb", "uid": "" },
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "influxdb", "uid": "" },
+          "query": "from(bucket: \"default\")\n  |> range(start: -24h)\n  |> filter(fn: (r) => r._measurement == \"node_telemetry\")\n  |> group(columns: [\"domain_profile_id\"])\n  |> distinct(column: \"node_id\")\n  |> count()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["iot", "nodes", "overview"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Node Overview",
+  "uid": "node-overview",
+  "version": 1
+}
