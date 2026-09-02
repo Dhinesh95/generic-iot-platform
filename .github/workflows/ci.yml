@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make
+
+      - name: Build all test binaries
+        run: make test-all 2>&1 | head -80
+
+      - name: Run full test suite
+        run: |
+          echo "=== Running all test suites ==="
+          FAILURES=0
+          SUITES=0
+          TOTAL_TESTS=0
+          TOTAL_PASS=0
+
+          for binary in build/test_*; do
+            name=$(basename "$binary")
+            echo ""
+            echo "--- $name ---"
+            output=$("$binary" 2>&1)
+            exit_code=$?
+            echo "$output"
+
+            # Extract test counts
+            tests=$(echo "$output" | grep "^Tests:" | tail -1 | awk '{print $2}')
+            passed=$(echo "$output" | grep "^Tests:" | tail -1 | awk '{print $4}')
+            if [ -n "$tests" ]; then
+              TOTAL_TESTS=$((TOTAL_TESTS + tests))
+              TOTAL_PASS=$((TOTAL_PASS + passed))
+            fi
+
+            if [ $exit_code -ne 0 ]; then
+              FAILURES=$((FAILURES + 1))
+              echo "FAILED: $name (exit code $exit_code)"
+            fi
+            SUITES=$((SUITES + 1))
+          done
+
+          echo ""
+          echo "========================================="
+          echo "  Suites: $SUITES"
+          echo "  Tests:  $TOTAL_TESTS total, $TOTAL_PASS passed"
+          echo "  Failed suites: $FAILURES"
+          echo "========================================="
+
+          if [ $FAILURES -ne 0 ]; then
+            echo "FAILED"
+            exit 1
+          fi
+          echo "ALL PASSED"
