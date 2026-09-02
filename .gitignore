@@ -9,7 +9,6 @@ build/
 .pio/
 .pio/build/
 .pio/libdeps/
-lib/
 
 # IDE
 .vscode/.browse.c_cpp.db*
