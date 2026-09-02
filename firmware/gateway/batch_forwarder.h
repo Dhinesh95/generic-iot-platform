@@ -23,6 +23,7 @@
 #define BATCH_FORWARDER_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 /* Forward declaration for Gateway auth context (defined in gateway_auth.h). */

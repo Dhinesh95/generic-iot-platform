@@ -12,6 +12,7 @@
 #include "delta_filter.h"
 #include "stateful_cache.h"
 #include <math.h>
+#include <stddef.h>
 
 /* ---------- Internal state ---------- */
 
