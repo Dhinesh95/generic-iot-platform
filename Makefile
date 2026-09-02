@@ -52,7 +52,13 @@ SHARED_SRCS = \
 	firmware/shared/jtag_disable.c \
 	firmware/shared/flash_partition.c \
 	firmware/shared/ota_session.c \
-	firmware/shared/influxdb_client.c
+	firmware/shared/influxdb_client.c \
+	firmware/shared/safety_monitor.c \
+	firmware/shared/fault_tree.c \
+	firmware/shared/verified_boot.c \
+	firmware/shared/diagnostics.c \
+	firmware/shared/config_engine.c \
+	firmware/shared/net_resilience.c
 
 # Hub source
 HUB_SRCS = \
@@ -101,7 +107,8 @@ EDGE_SRCS = \
 	firmware/edge/sensor_driver.c \
 	firmware/edge/edge_config.c \
 	firmware/edge/edge_node.c \
-	firmware/edge/edge_attestation.c
+	firmware/edge/edge_attestation.c \
+	firmware/edge/power_state.c
 
 # All source files needed for Hub/cloud tests
 # Note: includes GATEWAY_SRCS because ingestion_handler.c depends on gateway_auth
@@ -140,7 +147,15 @@ TESTS = \
 	test_cloud_ingestion \
 	test_time_source \
 	test_ota_session \
-	test_influxdb_client
+	test_influxdb_client \
+	test_safety_monitor \
+	test_fault_tree \
+	test_verified_boot \
+	test_diagnostics \
+	test_config_engine \
+	test_net_resilience \
+	test_power_state \
+	test_hil_framework
 
 # Gateway test files
 GATEWAY_TESTS = \
@@ -240,6 +255,24 @@ $(BUILD_DIR)/test_ota_session: $(TEST_DIR)/test_ota_session.c $(ALL_SRCS) $(MBED
 # Build InfluxDB client test binary (shared modules)
 $(BUILD_DIR)/test_influxdb_client: $(TEST_DIR)/test_influxdb_client.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls -lm
+
+# Build new Phase 19-28 test binaries
+$(BUILD_DIR)/test_safety_monitor: $(TEST_DIR)/test_safety_monitor.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_fault_tree: $(TEST_DIR)/test_fault_tree.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_verified_boot: $(TEST_DIR)/test_verified_boot.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_diagnostics: $(TEST_DIR)/test_diagnostics.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_config_engine: $(TEST_DIR)/test_config_engine.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_net_resilience: $(TEST_DIR)/test_net_resilience.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $< $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_power_state: $(TEST_DIR)/test_power_state.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -Ifirmware/edge -o $@ $< $(ALL_SRCS) $(EDGE_SRCS) -L$(BUILD_DIR) -lmbedtls
+$(BUILD_DIR)/test_hil_framework: $(TEST_DIR)/test_hil_framework.c tests/hil/hil_test_runner.c $(ALL_SRCS) $(MBEDTLS_LIB) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(INCLUDES) -Itests/hil -o $@ $< tests/hil/hil_test_runner.c $(ALL_SRCS) -L$(BUILD_DIR) -lmbedtls
 
 # Run Hub/Cloud tests
 test: $(addprefix $(BUILD_DIR)/,$(TESTS))

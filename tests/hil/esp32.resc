@@ -1,0 +1,12 @@
+-- Renode script for ESP32 Generic IoT Platform
+-- Usage: renode esp32.resc
+
+using sysbus
+
+mach create "esp32"
+
+machine LoadPlatformDescription @esp32.repl
+
+showAnalyzer sysbus.usart0
+
+start

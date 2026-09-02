@@ -1,6 +1,6 @@
 # Generic IoT Platform
 
-A three-tier IoT platform firmware (Edge → Gateway → Hub → Cloud) with 457 tests across 28 suites, covering Phases 1–18.1 of development.
+A three-tier IoT platform firmware (Edge → Gateway → Hub → Cloud) with 490 tests across 36 suites, covering Phases 1–28 of development.
 
 ## Architecture
 
@@ -149,7 +149,15 @@ make build/test_influxdb_client && ./build/test_influxdb_client
 | Gateway | 1 | 49 | Gateway auth, delta filter, batch forwarding, stateful cache |
 | Edge | 1 | 38 | Edge node, sensor drivers, attestation, power profiling |
 | Integration | 3 | 35 | Full pipeline integration, ingestion handler, historian |
-| **Total** | **28** | **457** | |
+| Safety Monitor | 1 | 4 | Independent watchdog for safety pipeline |
+| Fault Tree | 1 | 4 | Graceful degradation matrix |
+| Verified Boot | 1 | 4 | Boot-time integrity verification |
+| Diagnostics | 1 | 4 | Field observability & JSON output |
+| Config Engine | 1 | 4 | Runtime profile selection |
+| Net Resilience | 1 | 5 | Offline queue, backpressure, reconnect |
+| Power State | 1 | 4 | Edge Node battery management |
+| HIL Framework | 1 | 4 | Hardware-in-the-loop test harness |
+| **Total** | **36** | **490** | |
 
 ### ESP32 firmware builds (requires PlatformIO)
 
@@ -170,6 +178,9 @@ pio run -e esp32-water-treatment
 - **OTA integrity** — Incremental HMAC-SHA256 across chunked transfers, A/B flash rollback
 - **Data-at-rest** — Historian records encrypted with AES-128-CCM (separate key from transport)
 - **Tenant isolation** — InfluxDB buckets scoped per TenantToken_t, no cross-tenant access possible
+- **Safety monitor** — Independent watchdog verifies safety pipeline is alive
+- **Fault tree** — Graceful degradation with defined fault → level mapping
+- **Verified boot** — HMAC-verified boot chain with automatic rollback
 
 ## CI
 

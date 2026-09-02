@@ -1,0 +1,19 @@
+-- Renode platform description for ESP32
+-- Minimal description for Generic IoT Platform testing
+
+cpu: CPU.MaxElfSize @ sysbus
+    CPUType: "riscv"
+    TimeProvider: clint
+
+mem: Memory.MappedMemory @ sysbus 0x0
+    Size: 0x4000000  -- 64MB
+
+clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x02000000
+    frequency: 32000000
+    [0, 1] -> cpu@[3, 7]
+
+usart0: UART.LiteX_UART @ sysbus 0x3FF40000
+    BaudRate: 115200
+
+gpio0: GPIOPort.LiteX_GPIO @ sysbus 0x3FF44000
+    NumberOfLines: 32

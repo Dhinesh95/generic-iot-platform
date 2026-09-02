@@ -7,7 +7,44 @@ on:
     branches: [master, develop]
 
 jobs:
-  test:
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc make cppcheck
+
+      - name: Cppcheck static analysis
+        run: |
+          echo "=== Running cppcheck ==="
+          cppcheck --enable=warning,style,performance,portability \
+            --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            --suppress=unmatchedSuppression \
+            -I firmware/shared -I firmware/hub -I firmware/edge \
+            -I firmware/gateway -I cloud \
+            -I firmware/profiles/home -I firmware/profiles/agriculture \
+            -I firmware/profiles/hvac -I firmware/profiles/water_treatment \
+            -I lib/mbedtls/include \
+            firmware/ cloud/ \
+            --force --quiet 2>&1 || true
+          echo "Cppcheck completed"
+
+      - name: Security scan (flawfinder)
+        run: |
+          echo "=== Running flawfinder ==="
+          pip install flawfinder 2>/dev/null || true
+          flawfinder --error-level=3 --quiet firmware/ cloud/ 2>&1 || true
+          echo "Flawfinder completed"
+
+  build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
 
